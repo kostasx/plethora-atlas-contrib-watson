@@ -2,7 +2,9 @@ colors = require 'colors'
 got    = require 'got'
 fs     = require 'fs'
 
-API_URL = "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize?continuous=true"
+SpeechToTextURL = "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize?continuous=true"
+ToneAnalyzerURL = "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19"
+                # "https://gateway.watsonplatform.net/tone-analyzer/api/v3"
 
 # TERMINAL COLORS
 Reset     = "\x1b[0m"
@@ -58,7 +60,7 @@ Watson =
         bar.chars.complete = "#{FgGreen}▇#{Reset}"
     )
 
-    got.post(API_URL, {
+    got.post(SpeechToTextURL, {
 
       json: true
       body: stream       # WITH PROGRESS:
@@ -92,4 +94,305 @@ Watson =
 
     )
 
+  toneAnalyzer: (options)->
+
+    auth = "Basic " + new Buffer( Watson.creds.username + ":" + Watson.creds.password ).toString("base64")
+
+    new Promise((resolve, reject)->
+
+      got.post(ToneAnalyzerURL, {
+
+        json     : true
+        body     : JSON.stringify { text : options.text }
+        headers  :
+          "Authorization" : auth
+          "Content-Type"  : "application/json"
+
+      }).then((res)->
+
+        results = res.body
+        # console.log JSON.stringify(results, null, "  ")
+
+        resolve({ msg: "", text: options.text, emotion_tone: results.document_tone.tone_categories[0].tones })
+
+      ).catch(console.log)
+
+  )
+
 module.exports = Watson
+
+### EXAMPLE RESPONSE "I am sad. My dog died."
+{
+  "document_tone": {
+    "tone_categories": [
+      {
+        "tones": [
+          {
+            "score": 0.039917,
+            "tone_id": "anger",
+            "tone_name": "Anger"
+          },
+          {
+            "score": 0.063371,
+            "tone_id": "disgust",
+            "tone_name": "Disgust"
+          },
+          {
+            "score": 0.259677,
+            "tone_id": "fear",
+            "tone_name": "Fear"
+          },
+          {
+            "score": 0.003858,
+            "tone_id": "joy",
+            "tone_name": "Joy"
+          },
+          {
+            "score": 0.839898,
+            "tone_id": "sadness",
+            "tone_name": "Sadness"
+          }
+        ],
+        "category_id": "emotion_tone",
+        "category_name": "Emotion Tone"
+      },
+      {
+        "tones": [
+          {
+            "score": 0,
+            "tone_id": "analytical",
+            "tone_name": "Analytical"
+          },
+          {
+            "score": 0,
+            "tone_id": "confident",
+            "tone_name": "Confident"
+          },
+          {
+            "score": 0,
+            "tone_id": "tentative",
+            "tone_name": "Tentative"
+          }
+        ],
+        "category_id": "language_tone",
+        "category_name": "Language Tone"
+      },
+      {
+        "tones": [
+          {
+            "score": 0.011977,
+            "tone_id": "openness_big5",
+            "tone_name": "Openness"
+          },
+          {
+            "score": 0.080594,
+            "tone_id": "conscientiousness_big5",
+            "tone_name": "Conscientiousness"
+          },
+          {
+            "score": 0.221313,
+            "tone_id": "extraversion_big5",
+            "tone_name": "Extraversion"
+          },
+          {
+            "score": 0.578512,
+            "tone_id": "agreeableness_big5",
+            "tone_name": "Agreeableness"
+          },
+          {
+            "score": 0.000141,
+            "tone_id": "emotional_range_big5",
+            "tone_name": "Emotional Range"
+          }
+        ],
+        "category_id": "social_tone",
+        "category_name": "Social Tone"
+      }
+    ]
+  },
+  "sentences_tone": [
+    {
+      "sentence_id": 0,
+      "text": "I am sad.",
+      "input_from": 0,
+      "input_to": 9,
+      "tone_categories": [
+        {
+          "tones": [
+            {
+              "score": 0,
+              "tone_id": "anger",
+              "tone_name": "Anger"
+            },
+            {
+              "score": 0,
+              "tone_id": "disgust",
+              "tone_name": "Disgust"
+            },
+            {
+              "score": 0,
+              "tone_id": "fear",
+              "tone_name": "Fear"
+            },
+            {
+              "score": 0,
+              "tone_id": "joy",
+              "tone_name": "Joy"
+            },
+            {
+              "score": 1,
+              "tone_id": "sadness",
+              "tone_name": "Sadness"
+            }
+          ],
+          "category_id": "emotion_tone",
+          "category_name": "Emotion Tone"
+        },
+        {
+          "tones": [
+            {
+              "score": 0,
+              "tone_id": "analytical",
+              "tone_name": "Analytical"
+            },
+            {
+              "score": 0,
+              "tone_id": "confident",
+              "tone_name": "Confident"
+            },
+            {
+              "score": 0,
+              "tone_id": "tentative",
+              "tone_name": "Tentative"
+            }
+          ],
+          "category_id": "language_tone",
+          "category_name": "Language Tone"
+        },
+        {
+          "tones": [
+            {
+              "score": 0.099743,
+              "tone_id": "openness_big5",
+              "tone_name": "Openness"
+            },
+            {
+              "score": 0.266958,
+              "tone_id": "conscientiousness_big5",
+              "tone_name": "Conscientiousness"
+            },
+            {
+              "score": 0.491097,
+              "tone_id": "extraversion_big5",
+              "tone_name": "Extraversion"
+            },
+            {
+              "score": 0.594667,
+              "tone_id": "agreeableness_big5",
+              "tone_name": "Agreeableness"
+            },
+            {
+              "score": 0.038076,
+              "tone_id": "emotional_range_big5",
+              "tone_name": "Emotional Range"
+            }
+          ],
+          "category_id": "social_tone",
+          "category_name": "Social Tone"
+        }
+      ]
+    },
+    {
+      "sentence_id": 1,
+      "text": "My dog died.",
+      "input_from": 10,
+      "input_to": 22,
+      "tone_categories": [
+        {
+          "tones": [
+            {
+              "score": 0.071539,
+              "tone_id": "anger",
+              "tone_name": "Anger"
+            },
+            {
+              "score": 0.168703,
+              "tone_id": "disgust",
+              "tone_name": "Disgust"
+            },
+            {
+              "score": 0.244503,
+              "tone_id": "fear",
+              "tone_name": "Fear"
+            },
+            {
+              "score": 0.028376,
+              "tone_id": "joy",
+              "tone_name": "Joy"
+            },
+            {
+              "score": 0.686877,
+              "tone_id": "sadness",
+              "tone_name": "Sadness"
+            }
+          ],
+          "category_id": "emotion_tone",
+          "category_name": "Emotion Tone"
+        },
+        {
+          "tones": [
+            {
+              "score": 0,
+              "tone_id": "analytical",
+              "tone_name": "Analytical"
+            },
+            {
+              "score": 0,
+              "tone_id": "confident",
+              "tone_name": "Confident"
+            },
+            {
+              "score": 0,
+              "tone_id": "tentative",
+              "tone_name": "Tentative"
+            }
+          ],
+          "category_id": "language_tone",
+          "category_name": "Language Tone"
+        },
+        {
+          "tones": [
+            {
+              "score": 0.208221,
+              "tone_id": "openness_big5",
+              "tone_name": "Openness"
+            },
+            {
+              "score": 0.273372,
+              "tone_id": "conscientiousness_big5",
+              "tone_name": "Conscientiousness"
+            },
+            {
+              "score": 0.536444,
+              "tone_id": "extraversion_big5",
+              "tone_name": "Extraversion"
+            },
+            {
+              "score": 0.599567,
+              "tone_id": "agreeableness_big5",
+              "tone_name": "Agreeableness"
+            },
+            {
+              "score": 0.224992,
+              "tone_id": "emotional_range_big5",
+              "tone_name": "Emotional Range"
+            }
+          ],
+          "category_id": "social_tone",
+          "category_name": "Social Tone"
+        }
+      ]
+    }
+  ]
+}
+###

@@ -1,6 +1,6 @@
 {
   "name": "plethora-atlas-contrib-watson",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "IBM Watson utilities for the Plethora Atlas Project",
   "main": "watson.js",
   "scripts": {

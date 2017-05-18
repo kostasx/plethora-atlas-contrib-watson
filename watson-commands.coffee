@@ -7,9 +7,17 @@ initCommands = (program)->
     .description('IBM Watson related utilities')
     .option('--speech-to-text <audio>', 'Convert <audio> file to text. Maximum size is 100MB.')
     .option('--output <JSON>', 'Write the output to a JSON file.')
+    .option('--tone-analyzer <PHRASE>', 'Do a tone analysis on a phrase.')
     .action (options) ->
 
       Watson = require('./watson')
+
+      if options.toneAnalyzer
+
+        Watson.init( config.keys.watson['tone-analyzer'] )
+        Watson.toneAnalyzer({ text: options.toneAnalyzer })
+        .then(console.log)
+        .catch(console.log)
 
       if options.speechToText
 
